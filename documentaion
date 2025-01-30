@@ -1,0 +1,94 @@
+📄 Docker Documentation for News Aggregator App
+This document provides instructions on how to run the frontend application inside a Docker container.
+
+📝 Prerequisites
+Before running the project in Docker, ensure you have the following installed:
+
+Docker (Latest version recommended)
+🚀 Steps to Run the Project in Docker
+1️⃣ Clone the Repository
+If you haven’t already, clone the project from your repository:
+
+sh
+Copy
+Edit
+git clone https://github.com/your-username/news-aggregator.git
+cd news-aggregator
+2️⃣ Build the Docker Image
+Run the following command inside the project directory to build the Docker image:
+
+sh
+Copy
+Edit
+docker build -t news-aggregator .
+🔹 What this does:
+
+-t news-aggregator → Tags the image as news-aggregator.
+. → Uses the current directory (Dockerfile should be in the root).
+3️⃣ Run the Docker Container
+Once the image is built, start the container using:
+
+sh
+Copy
+Edit
+docker run -p 3000:3000 --name news-aggregator-container news-aggregator
+🔹 What this does:
+
+-p 3000:3000 → Maps port 3000 from the container to localhost:3000.
+--name news-aggregator-container → Names the container for easy reference.
+news-aggregator → The Docker image name created in step 2.
+4️⃣ Access the Application
+Once the container is running, open your browser and go to:
+🔗 http://localhost:3000
+
+📌 Additional Docker Commands
+Check Running Containers
+sh
+Copy
+Edit
+docker ps
+Stop the Running Container
+sh
+Copy
+Edit
+docker stop news-aggregator-container
+Remove the Container
+sh
+Copy
+Edit
+docker rm news-aggregator-container
+Remove the Image
+sh
+Copy
+Edit
+docker rmi news-aggregator
+Restart the Container
+sh
+Copy
+Edit
+docker start news-aggregator-container
+🔧 Troubleshooting
+Error: Port 3000 is already in use
+Stop any process using port 3000:
+sh
+Copy
+Edit
+sudo lsof -i :3000
+sudo kill -9 <PID>
+Or run the container on a different port:
+sh
+Copy
+Edit
+docker run -p 8080:3000 --name news-aggregator-container news-aggregator
+Then access it at http://localhost:8080.
+Rebuild the Docker Image (If Code Changes)
+If you modify the code and want to apply changes:
+
+sh
+Copy
+Edit
+docker build --no-cache -t news-aggregator .
+🎯 Conclusion
+Your news aggregator app is now containerized using Docker! 🎉 You can easily build, run, and deploy using the steps above.
+
+Would you like to add Docker Compose support for easier multi-container management? 🚀
