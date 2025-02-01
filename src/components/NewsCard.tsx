@@ -1,4 +1,6 @@
-const NewsCard = ({ article }: { article: any }) => {
+import { ArticleFields } from "../types/types";
+
+const NewsCard = ({ article }: { article: ArticleFields }) => {
   return (
     <div className="bg-white p-4 rounded-xl shadow-lg mb-4 transition-transform transform hover:scale-105">
   {/* Title */}

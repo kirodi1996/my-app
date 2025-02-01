@@ -1,16 +1,16 @@
 import { useEffect, useState, useRef } from "react";
 import { fetchNews } from "../api/newsApi";
 import NewsCard from "../components/NewsCard";
+import { NewsArticle } from "../types/types";
 
 const categories = ["Technology", "Business", "Sports", "Health"];
-const sources = ["BBC News", "CNN", "New York Times", "Reuters"];
 
 const Home = () => {
-  const [articles, setArticles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
+  const [articles, setArticles] = useState<NewsArticle[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [query, setQuery] = useState<string>("");
   
-  const [filters, setFilters] = useState(() => {
+  const [filters, setFilters] = useState(() => { //TODO typecast
     return {
       categories: JSON.parse(localStorage.getItem("categories") || "[]"),
       sources: JSON.parse(localStorage.getItem("sources") || "[]"),
@@ -58,7 +58,7 @@ const Home = () => {
 
   }, [query, filters]);
 
-  const updateFilters = (key: string, value: any) => {
+  const updateFilters = (key: string, value: string) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
     localStorage.setItem(key, JSON.stringify(value));
@@ -100,23 +100,6 @@ const Home = () => {
                   className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 {category}
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-lg font-semibold mb-2">Sources</h2>
-          <div className="grid grid-cols-1 gap-2">
-            {sources.map((source) => (
-              <label key={source} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={filters.sources.includes(source)}
-                  onChange={() => toggleCheckbox("sources", source)}
-                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                {source}
               </label>
             ))}
           </div>
