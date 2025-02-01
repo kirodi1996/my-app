@@ -17,10 +17,10 @@ const fetchData = async (url: string) => {
 
 // Fetch articles from NewsAPI
 const fetchNewsAPI = async (query: string = '', filters: any) => {
-  let url = `https://newsapi.org/v2/everything?apiKey=${NEWSAPI_KEY}&domains=techcrunch.com,thenextweb.com`;
-  if(query) url+= `&q=${query}`;
-  if (filters.category) url += `&category=${filters.category}`;
-  if (filters.source) url += `&sources=${filters.source}`;
+  let url = `https://newsapi.org/v2/top-headlines?apiKey=${NEWSAPI_KEY}&country=de`;
+  if(query) url+= `&q=+${query}`;
+  if (filters.categories.length) url += `&category=${filters.categories.join(',')}`;
+  // if (filters.sources.length) url += `&sources=${filters.source}`;
   if (filters.date) url += `&from=${filters.date}`;
 
   const data = await fetchData(url);
@@ -40,7 +40,7 @@ const fetchGuardianAPI = async (query: string, filters: any) => {
   let url = `https://content.guardianapis.com/search?api-key=${GUARDIAN_KEY}&show-fields=thumbnail,byline`;
 
   if(query) url+= `&q=${query}`;
-  if (filters.category) url += `&section=${filters.category}`;
+  if (filters.categories.length) url += `&section=${filters.categories.join(',')}`;
   if (filters.date) url += `&from-date=${filters.date}`;
 
   const data = await fetchData(url);
@@ -60,9 +60,8 @@ const fetchNewsDataIO = async (query: string, filters: any) => {
   let url = `https://newsdata.io/api/1/news?apikey=${NEWSDATA_KEY}`;
 
   if(query) url+= `&q=${query}`;
-  if (filters.category) url += `&category=${filters.category}`;
+  if (filters.categories.length) url += `&category=${filters.categories.join(',')}`;
  // if (filters.source) url += `&sources=${filters.source}`;
-  if (filters.date) url += `&from=${filters.date}`;
 
   const data = await fetchData(url);
   return data?.results?.map((article: any) => ({
@@ -76,7 +75,7 @@ const fetchNewsDataIO = async (query: string, filters: any) => {
   })) || [];
 };
 
-// Unified fetch function
+
 export const fetchNews = async (query: string, filters: any = {}) => {
   const [newsAPI, guardian, newsData] = await Promise.all([
     fetchNewsAPI(query, filters),
@@ -84,5 +83,13 @@ export const fetchNews = async (query: string, filters: any = {}) => {
     fetchNewsDataIO(query, filters),
   ]);
 
-  return [...newsAPI, ...guardian, ...newsData];
+  let allArticles = [...newsAPI, ...guardian, ...newsData];
+
+  if (filters.authors && filters.authors.length > 0) {
+    allArticles = allArticles.filter((article) =>
+      article.author && filters.authors.includes(article.author)
+    );
+  }
+
+  return allArticles;
 };

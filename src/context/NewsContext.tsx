@@ -18,9 +18,9 @@ export const NewsProvider = ({ children }: { children: ReactNode }) => {
 
   // Load preferences from localStorage on mount
   useEffect(() => {
-    const storedSources = localStorage.getItem("preferredSources");
-    const storedCategories = localStorage.getItem("preferredCategories");
-    const storedAuthors = localStorage.getItem("preferredAuthors");
+    const storedSources = localStorage.getItem("sources");
+    const storedCategories = localStorage.getItem("categories");
+    const storedAuthors = localStorage.getItem("authors");
 
     if (storedSources) setPreferredSources(JSON.parse(storedSources));
     if (storedCategories) setPreferredCategories(JSON.parse(storedCategories));
@@ -29,9 +29,9 @@ export const NewsProvider = ({ children }: { children: ReactNode }) => {
 
   // Save preferences to localStorage when they change
   useEffect(() => {
-    localStorage.setItem("preferredSources", JSON.stringify(preferredSources));
-    localStorage.setItem("preferredCategories", JSON.stringify(preferredCategories));
-    localStorage.setItem("preferredAuthors", JSON.stringify(preferredAuthors));
+    localStorage.setItem("sources", JSON.stringify(preferredSources));
+    localStorage.setItem("categories", JSON.stringify(preferredCategories));
+    localStorage.setItem("authors", JSON.stringify(preferredAuthors));
   }, [preferredSources, preferredCategories, preferredAuthors]);
 
   return (

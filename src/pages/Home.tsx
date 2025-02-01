@@ -2,14 +2,21 @@ import { useEffect, useState, useRef } from "react";
 import { fetchNews } from "../api/newsApi";
 import NewsCard from "../components/NewsCard";
 
+const categories = ["Technology", "Business", "Sports", "Health"];
+const sources = ["BBC News", "CNN", "New York Times", "Reuters"];
+
 const Home = () => {
   const [articles, setArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [filters, setFilters] = useState({
-    category: "",
-    source: "",
-    date: "",
+  
+  const [filters, setFilters] = useState(() => {
+    return {
+      categories: JSON.parse(localStorage.getItem("categories") || "[]"),
+      sources: JSON.parse(localStorage.getItem("sources") || "[]"),
+      date: "",
+      authors: JSON.parse(localStorage.getItem("authors") || "[]"),
+    };
   });
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -25,6 +32,10 @@ const Home = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    getNews();
+  }, []);
 
   useEffect(() => {
 
@@ -47,9 +58,19 @@ const Home = () => {
 
   }, [query, filters]);
 
-  useEffect(() => {
-    getNews();
-  }, []);
+  const updateFilters = (key: string, value: any) => {
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+    localStorage.setItem(key, JSON.stringify(value));
+  };
+
+  const toggleCheckbox = (key: string, value: string) => {
+    const updatedList = filters[key].includes(value)
+      ? filters[key].filter((item: string) => item !== value)
+      : [...filters[key], value];
+
+    updateFilters(key, updatedList);
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 mt-16">
@@ -66,35 +87,51 @@ const Home = () => {
 
     {/* Filters */}
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-      <select
-        value={filters.category}
-        onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-        className="p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-      >
-        <option value="">All Categories</option>
-        <option value="technology">Technology</option>
-        <option value="business">Business</option>
-        <option value="sports">Sports</option>
-      </select>
+        {/* Preferred Categories (Checkboxes) */}
+        <div>
+          <h2 className="text-lg font-semibold mb-2">Categories</h2>
+          <div className="grid grid-cols-1 gap-2">
+            {categories.map((category) => (
+              <label key={category} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={filters.categories.includes(category)}
+                  onChange={() => toggleCheckbox("categories", category)}
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                {category}
+              </label>
+            ))}
+          </div>
+        </div>
 
-      <select
-        value={filters.source}
-        onChange={(e) => setFilters({ ...filters, source: e.target.value })}
-        className="p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-      >
-        <option value="">All Sources</option>
-        <option value="bbc-news">BBC News</option>
-        <option value="cnn">CNN</option>
-        <option value="the-guardian">The Guardian</option>
-      </select>
+        <div>
+          <h2 className="text-lg font-semibold mb-2">Sources</h2>
+          <div className="grid grid-cols-1 gap-2">
+            {sources.map((source) => (
+              <label key={source} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={filters.sources.includes(source)}
+                  onChange={() => toggleCheckbox("sources", source)}
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                {source}
+              </label>
+            ))}
+          </div>
+        </div>
 
-      <input
-        type="date"
-        value={filters.date}
-        onChange={(e) => setFilters({ ...filters, date: e.target.value })}
-        className="p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-      />
-    </div>
+        <div>
+          <h2 className="text-lg font-semibold mb-2">Date</h2>
+          <input
+            type="date"
+            value={filters.date}
+            onChange={(e) => updateFilters("date", e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+          />
+        </div>
+        </div>
 
     {/* Show Loading Spinner */}
     {loading ? (
@@ -111,64 +148,6 @@ const Home = () => {
   </div>
 
   )
-
-  // return(
-  //   <div className="max-w-6xl mx-auto px-4 py-6">
-  //     <h1 className="text-3xl font-bold text-center mb-6">Search News</h1>
-
-  //     {/* Search Input */}
-  //     <input
-  //       type="text"
-  //       placeholder="Search articles..."
-  //       value={query}
-  //       onChange={(e) => setQuery(e.target.value)}
-  //       className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition mb-4"
-  //     />
-
-  //     {/* Filter Options */}
-  //     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-  //       <select
-  //         value={filters.category}
-  //         onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-  //         className="p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-  //       >
-  //         <option value="">All Categories</option>
-  //         <option value="technology">Technology</option>
-  //         <option value="business">Business</option>
-  //         <option value="sports">Sports</option>
-  //       </select>
-
-  //       <select
-  //         value={filters.source}
-  //         onChange={(e) => setFilters({ ...filters, source: e.target.value })}
-  //         className="p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-  //       >
-  //         <option value="">All Sources</option>
-  //         <option value="bbc-news">BBC News</option>
-  //         <option value="cnn">CNN</option>
-  //         <option value="the-guardian">The Guardian</option>
-  //       </select>
-
-  //       <input
-  //         type="date"
-  //         value={filters.date}
-  //         onChange={(e) => setFilters({ ...filters, date: e.target.value })}
-  //         className="p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-  //       />
-  //     </div>
-
-  //     {/* Articles List */}
-  //     {loading ? (
-  //       <p className="text-center text-lg font-semibold">Loading...</p>
-  //     ) : (
-  //       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-  //         {articles.map((article, index) => (
-  //           <NewsCard key={index} article={article} />
-  //         ))}
-  //       </div>
-  //     )}
-  //   </div>
-  // );
 };
 
 export default Home;

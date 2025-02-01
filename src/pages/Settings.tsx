@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNewsContext } from "../context/NewsContext";
 
 const sources = ["BBC News", "CNN", "New York Times", "Reuters"];
@@ -6,20 +6,44 @@ const categories = ["Technology", "Business", "Sports", "Health"];
 const authors = ["John Doe", "Jane Smith", "Alice Johnson"];
 
 const Settings = () => {
-  const newsContext = useNewsContext();
-  if (!newsContext) return <p className="text-center text-gray-500">Loading...</p>;
+  const newsContext = useNewsContext(); 
 
-  const {
-    preferredSources,
-    preferredCategories,
-    preferredAuthors,
-    setPreferredSources,
-    setPreferredCategories,
-    setPreferredAuthors,
-  } = newsContext;
+  const [selectedSources, setSelectedSources] = useState<string[]>(newsContext?.preferredSources || []);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(newsContext?.preferredCategories || []);
+  const [selectedAuthors, setSelectedAuthors] = useState<string[]>(newsContext?.preferredAuthors || []);
+
+  // Load preferences when component mounts
+  useEffect(() => {
+    const storedSources = localStorage.getItem("sources");
+    const storedCategories = localStorage.getItem("categories");
+    const storedAuthors = localStorage.getItem("authors");
+
+    if (storedSources) setSelectedSources(JSON.parse(storedSources));
+    if (storedCategories) setSelectedCategories(JSON.parse(storedCategories));
+    if (storedAuthors) setSelectedAuthors(JSON.parse(storedAuthors));
+  }, []);
+
+  // If context is still loading, show a loading message
+  if (!newsContext) {
+    return <p className="text-center text-gray-500">Loading...</p>;
+  }
+
+  const { setPreferredSources, setPreferredCategories, setPreferredAuthors } = newsContext;
 
   const toggleSelection = (list: string[], setList: (items: string[]) => void, item: string) => {
     setList(list.includes(item) ? list.filter((i) => i !== item) : [...list, item]);
+  };
+
+  const handleSavePreferences = () => {
+    setPreferredSources(selectedSources);
+    setPreferredCategories(selectedCategories);
+    setPreferredAuthors(selectedAuthors);
+
+    localStorage.setItem("sources", JSON.stringify(selectedSources));
+    localStorage.setItem("categories", JSON.stringify(selectedCategories));
+    localStorage.setItem("authors", JSON.stringify(selectedAuthors));
+
+    alert("Preferences saved successfully!");
   };
 
   return (
@@ -35,8 +59,8 @@ const Settings = () => {
               <label key={source} className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={preferredSources.includes(source)}
-                  onChange={() => toggleSelection(preferredSources, setPreferredSources, source)}
+                  checked={selectedSources.includes(source)}
+                  onChange={() => toggleSelection(selectedSources, setSelectedSources, source)}
                   className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 {source}
@@ -53,8 +77,8 @@ const Settings = () => {
               <label key={category} className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={preferredCategories.includes(category)}
-                  onChange={() => toggleSelection(preferredCategories, setPreferredCategories, category)}
+                  checked={selectedCategories.includes(category)}
+                  onChange={() => toggleSelection(selectedCategories, setSelectedCategories, category)}
                   className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 {category}
@@ -71,8 +95,8 @@ const Settings = () => {
               <label key={author} className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={preferredAuthors.includes(author)}
-                  onChange={() => toggleSelection(preferredAuthors, setPreferredAuthors, author)}
+                  checked={selectedAuthors.includes(author)}
+                  onChange={() => toggleSelection(selectedAuthors, setSelectedAuthors, author)}
                   className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 {author}
@@ -83,7 +107,7 @@ const Settings = () => {
 
         {/* Save Button */}
         <button
-          onClick={() => alert("Preferences Saved!")}
+          onClick={handleSavePreferences}
           className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition mt-4"
         >
           Save Preferences
